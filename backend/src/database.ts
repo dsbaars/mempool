@@ -5,6 +5,7 @@ import logger from './logger';
 export class DB {
   static pool = createPool({
     host: config.DATABASE.HOST,
+    socketPath: config.DATABASE.SOCKET,
     port: config.DATABASE.PORT,
     database: config.DATABASE.DATABASE,
     user: config.DATABASE.USERNAME,

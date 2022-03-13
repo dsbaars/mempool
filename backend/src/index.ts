@@ -2,7 +2,9 @@ import { Express, Request, Response, NextFunction } from 'express';
 import * as express from 'express';
 import * as http from 'http';
 import * as WebSocket from 'ws';
-import * as cluster from 'cluster';
+// FIXME workaround from https://stackoverflow.com/questions/69094343/node-js-clusters-cant-be-imported-in-typescript
+import * as _cluster from 'cluster';
+const cluster = _cluster as unknown as _cluster.Cluster;
 import axios from 'axios';
 
 import { checkDbConnection } from './database';
@@ -43,7 +45,7 @@ class Server {
       return;
     }
 
-    if (cluster.isMaster) {
+    if (cluster.isPrimary) {
       logger.notice(`Mempool Server (Master) is running on port ${config.MEMPOOL.HTTP_PORT} (${backendInfo.getShortCommitHash()})`);
 
       const numCPUs = config.MEMPOOL.SPAWN_CLUSTER_PROCS;
@@ -106,7 +108,7 @@ class Server {
       }
     }
 
-    if (config.STATISTICS.ENABLED && config.DATABASE.ENABLED && cluster.isMaster) {
+    if (config.STATISTICS.ENABLED && config.DATABASE.ENABLED && cluster.isPrimary) {
       statistics.startStatistics();
     }
 

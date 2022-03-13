@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 const fsPromises = fs.promises;
-import * as cluster from 'cluster';
+// FIXME workaround from https://stackoverflow.com/questions/69094343/node-js-clusters-cant-be-imported-in-typescript
+import * as _cluster from 'cluster';
+const cluster = _cluster as unknown as _cluster.Cluster;
 import memPool from './mempool';
 import blocks from './blocks';
 import logger from '../logger';
@@ -17,7 +19,7 @@ class DiskCache {
   constructor() { }
 
   async $saveCacheToDisk(): Promise<void> {
-    if (!cluster.isMaster) {
+    if (!cluster.isPrimary) {
       return;
     }
     if (this.isWritingCache) {
