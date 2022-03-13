@@ -1,19 +1,29 @@
 import config from './config';
 import { createPool } from 'mysql2/promise';
 import logger from './logger';
+import { PoolOptions } from 'mysql2/typings/mysql';
 
 export class DB {
-  static pool = createPool({
-    host: config.DATABASE.HOST,
-    socketPath: config.DATABASE.SOCKET,
-    port: config.DATABASE.PORT,
-    database: config.DATABASE.DATABASE,
-    user: config.DATABASE.USERNAME,
-    password: config.DATABASE.PASSWORD,
-    connectionLimit: 10,
-    supportBigNumbers: true,
-    timezone: '+00:00',
-  });
+  static poolConfig = ():PoolOptions => {
+    let poolConfig:PoolOptions = {
+      port: config.DATABASE.PORT,
+      database: config.DATABASE.DATABASE,
+      user: config.DATABASE.USERNAME,
+      password: config.DATABASE.PASSWORD,
+      connectionLimit: 10,
+      supportBigNumbers: true,
+      timezone: '+00:00',
+    }
+
+    if (config.DATABASE.SOCKET)
+      poolConfig.socketPath = config.DATABASE.SOCKET
+    else    
+      poolConfig.host = config.DATABASE.HOST
+
+    return poolConfig;
+  }
+
+  static pool = createPool(DB.poolConfig());
 }
 
 export async function checkDbConnection() {
